@@ -1,7 +1,14 @@
 #![no_std]
 #![no_main]
 
+use arduino_hal::pac;
 use panic_halt as _;
+
+/// Set the timer TOP value using the OCR1A register.
+/// Requires Waveform Generation Mode 15 for FastPWM
+fn set_top(timer1: &pac::TC1, top: u16) {
+    timer1.ocr1a.write(|w| w.bits(top));
+}
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -17,14 +24,14 @@ fn main() -> ! {
     timer1.tccr1b.write(|w| w.wgm1().bits(0b11)  // The other half of wgm mode config
 			.cs1().bits(0b101)); // prescaler 1024
 
-    timer1.ocr1a.write(|w| w.bits(125)); // TOP
+    set_top(&timer1, 125);
 
     let pins = arduino_hal::pins!(peripherals);
     let output = pins.d10;
     output.into_output();
     loop {
 	for top in 0..=125 {
-            timer1.ocr1a.write(|w| w.bits(top));
+            set_top(&timer1, top);
 	    arduino_hal::delay_ms(20); // control duty cycle
 	}
     }
