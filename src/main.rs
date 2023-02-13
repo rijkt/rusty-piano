@@ -1,17 +1,15 @@
 #![no_std]
 #![no_main]
 
-use arduino_hal::pac;
+use arduino_hal::{pac::{self}, hal::port::PB2, port::{Pin, mode::{Input, Floating}}};
 use panic_halt as _;
 
 #[arduino_hal::entry]
 fn main() -> ! {
     let peripherals = arduino_hal::Peripherals::take().unwrap();
     let timer1 = peripherals.TC1;
-    enable_fast_pwm(&timer1);
     let pins = arduino_hal::pins!(peripherals);
-    let oc1b = pins.d10;
-    oc1b.into_output(); // todo: use low-level library, move to pwm fn
+    enable_fast_pwm(&timer1, pins.d10);
 
     loop {
         for top in 0..=125 {
@@ -27,10 +25,11 @@ fn main() -> ! {
 ///
 /// Note: Some register writes are split for documentation's sake. The calls to
 /// r.<register>.bits() are used to preserve previously written data.
-fn enable_fast_pwm(timer1: &pac::TC1) {
+fn enable_fast_pwm(timer1: &pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
     set_wgm_15(&timer1);
     set_com_3(&timer1);
     set_prescaler(&timer1);
+    oc1b.into_output();
 }
 
 
