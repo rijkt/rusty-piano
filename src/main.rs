@@ -29,6 +29,7 @@ fn enable_fast_pwm(timer1: &pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
     set_wgm_15(timer1);
     set_com_3(timer1);
     set_prescaler(timer1);
+    set_top(timer1, 255);
     oc1b.into_output();
 }
 
