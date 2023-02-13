@@ -26,12 +26,11 @@ fn main() -> ! {
 /// Note: Some register writes are split for documentation's sake. The calls to
 /// r.<register>.bits() are used to preserve previously written data.
 fn enable_fast_pwm(timer1: &pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
-    set_wgm_15(&timer1);
-    set_com_3(&timer1);
-    set_prescaler(&timer1);
+    set_wgm_15(timer1);
+    set_com_3(timer1);
+    set_prescaler(timer1);
     oc1b.into_output();
 }
-
 
 /// Wave-form generation mode 15
 /// FastPWM, TOP in OCR1A Update of OCR1A at BOTTOM, TOV1 Flag Set on TOP
