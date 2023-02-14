@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use arduino_hal::{pac::{self}, hal::port::PB2, port::{Pin, mode::{Input, Floating}}};
+use arduino_hal::{hal::port::PB2, port::{Pin, mode::{Input, Floating}}};
 use panic_halt as _;
 
 #[arduino_hal::entry]
@@ -25,7 +25,7 @@ fn main() -> ! {
 ///
 /// Note: Some register writes are split for documentation's sake. The calls to
 /// r.<register>.bits() are used to preserve previously written data.
-fn enable_fast_pwm(timer1: &pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
+fn enable_fast_pwm(timer1: &arduino_hal::pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
     set_wgm_15(timer1);
     set_com_3(timer1);
     set_prescaler(timer1);
@@ -35,7 +35,7 @@ fn enable_fast_pwm(timer1: &pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
 
 /// Wave-form generation mode 15
 /// FastPWM, TOP in OCR1A Update of OCR1A at BOTTOM, TOV1 Flag Set on TOP
-fn set_wgm_15(timer1: &pac::TC1) {
+fn set_wgm_15(timer1: &arduino_hal::pac::TC1) {
     timer1.tccr1a.modify(|r, w| w
                          .wgm1().bits(0b11)
                          .com1b().bits(r.com1b().bits())
@@ -50,7 +50,7 @@ fn set_wgm_15(timer1: &pac::TC1) {
 /// Compare Output Mode 3.
 /// Set OC1A/OC1B on compare match, clear OC1A/OC1B at BOTTOM (inverting mode).
 /// Relevant for us is OC1B: our output pin.
-fn set_com_3(timer1: &pac::TC1) {
+fn set_com_3(timer1: &arduino_hal::pac::TC1) {
     timer1.tccr1a.modify(
         |r, w| w
             .wgm1().bits(r.wgm1().bits())
@@ -60,7 +60,7 @@ fn set_com_3(timer1: &pac::TC1) {
 }
 
 /// Set prescale factor. One of Direct (1), 8, 64, 256 or 1024.
-fn set_prescaler(timer1: &pac::TC1) {
+fn set_prescaler(timer1: &arduino_hal::pac::TC1) {
     // todo: parameterize mode
     timer1.tccr1b.modify(|r, w| w
                          .wgm1().bits(r.wgm1().bits())
@@ -69,6 +69,6 @@ fn set_prescaler(timer1: &pac::TC1) {
 
 /// Set the timer TOP value using the OCR1A register.
 /// Requires Waveform Generation Mode 15 for FastPWM
-fn set_top(timer1: &pac::TC1, top: u16) {
+fn set_top(timer1: &arduino_hal::pac::TC1, top: u16) {
     timer1.ocr1a.write(|w| w.bits(top));
 }
