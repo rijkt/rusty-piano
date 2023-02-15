@@ -3,7 +3,7 @@ name = "rusty-piano"
 version = "0.1.0"
 authors = ["Pascal Ellenberger <pascal.ellenberger@protonmail.com>", "Tö <toebi@protonmail.com>"]
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "MIT"
 
 [[bin]]
 name = "rusty-piano"
