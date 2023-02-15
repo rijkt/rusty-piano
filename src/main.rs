@@ -14,7 +14,7 @@ fn main() -> ! {
     loop {
         for top in 0..=125 {
             set_top(&timer1, top);
-            arduino_hal::delay_ms(20); // control duty cycle
+            arduino_hal::delay_ms(20);
         }
     }
 }
@@ -71,4 +71,5 @@ fn set_prescaler(timer1: &arduino_hal::pac::TC1) {
 /// Requires Waveform Generation Mode 15 for FastPWM
 fn set_top(timer1: &arduino_hal::pac::TC1, top: u16) {
     timer1.ocr1a.write(|w| w.bits(top));
+    timer1.ocr1b.write(|w| w.bits(top/2));
 }
