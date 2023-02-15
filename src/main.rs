@@ -10,12 +10,14 @@ fn main() -> ! {
     let timer1 = peripherals.TC1;
     let pins = arduino_hal::pins!(peripherals);
     enable_fast_pwm(&timer1, pins.d10);
-
+    let prescaler = 1024;
+    let system_clock: u32 = 16_000_000;
+    const A_4: u32 = 440; // hz
+    let timer_clock = system_clock/prescaler;
+    let top = (timer_clock / A_4) as u16 - 1;
+    set_top(&timer1, top);
+    
     loop {
-        for top in 0..=125 {
-            set_top(&timer1, top);
-            arduino_hal::delay_ms(20);
-        }
     }
 }
 
@@ -70,6 +72,6 @@ fn set_prescaler(timer1: &arduino_hal::pac::TC1) {
 /// Set the timer TOP value using the OCR1A register.
 /// Requires Waveform Generation Mode 15 for FastPWM
 fn set_top(timer1: &arduino_hal::pac::TC1, top: u16) {
-    timer1.ocr1a.write(|w| w.bits(top));
-    timer1.ocr1b.write(|w| w.bits(top/2));
+    timer1.ocr1a.write(|w| w.bits(top)); // top
+    timer1.ocr1b.write(|w| w.bits(top/2)); // duty cycle
 }
