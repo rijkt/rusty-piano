@@ -18,13 +18,15 @@ fn main() -> ! {
     }
 }
 
-fn play_note(note: u32, prescale_mode: driver::PrescaleMode, timer1: arduino_hal::pac::TC1) {
-    const SYSTEM_CLOCK: u32 = 16_000_000;
+fn play_note(
+    target_frequency: u32,
+    prescale_mode: driver::PrescaleMode,
+    timer1: arduino_hal::pac::TC1
+) {
+    const SYSTEM_CLOCK_FREQ: u32 = 16_000_000;
     let prescale_factor = driver::to_factor(prescale_mode);
-    let timer_clock = SYSTEM_CLOCK / prescale_factor as u32;
-    let top = (timer_clock / note) as u16 - 1;
+    let timer_clock = SYSTEM_CLOCK_FREQ / prescale_factor as u32;
+    // target_frequency = timer_clock / (top + 1). Add one because of zero-indexing.
+    let top = (timer_clock / target_frequency) as u16 - 1;
     driver::set_top(&timer1, top);
 }
-
-
-
