@@ -6,21 +6,22 @@ use panic_halt as _;
 
 #[arduino_hal::entry]
 fn main() -> ! {
+    let prescale_mode = PrescaleMode::Freq1024;
     let peripherals = arduino_hal::Peripherals::take().unwrap();
     let timer1 = peripherals.TC1;
     let pins = arduino_hal::pins!(peripherals);
-    enable_fast_pwm(&timer1, pins.d10);
-    let prescale_factor = 1024;
+    enable_fast_pwm(&timer1, pins.d10, prescale_mode);
     const A_4: u32 = 440; // hz
-    play_note(A_4, prescale_factor, timer1);
+    play_note(A_4, prescale_mode, timer1);
     
     loop {
     }
 }
 
-fn play_note(note: u32, prescale_factor: u32, timer1: arduino_hal::pac::TC1) {
+fn play_note(note: u32, prescale_mode: PrescaleMode, timer1: arduino_hal::pac::TC1) {
     const SYSTEM_CLOCK: u32 = 16_000_000;
-    let timer_clock = SYSTEM_CLOCK / prescale_factor;
+    let prescale_factor = to_factor(prescale_mode);
+    let timer_clock = SYSTEM_CLOCK / prescale_factor as u32;
     let top = (timer_clock / note) as u16 - 1;
     set_top(&timer1, top);
 }
@@ -31,10 +32,10 @@ fn play_note(note: u32, prescale_factor: u32, timer1: arduino_hal::pac::TC1) {
 ///
 /// Note: Some register writes are split for documentation's sake. The calls to
 /// r.<register>.bits() are used to preserve previously written data.
-fn enable_fast_pwm(timer1: &arduino_hal::pac::TC1, oc1b: Pin<Input<Floating>, PB2>) {
+fn enable_fast_pwm(timer1: &arduino_hal::pac::TC1, oc1b: Pin<Input<Floating>, PB2>, mode: PrescaleMode) {
     set_wgm_15(timer1);
     set_com_3(timer1);
-    set_prescaler(timer1);
+    set_prescaler(timer1, mode);
     set_top(timer1, 255);
     oc1b.into_output();
 }
@@ -65,12 +66,41 @@ fn set_com_3(timer1: &arduino_hal::pac::TC1) {
     );    
 }
 
+#[derive(Copy, Clone)]
+enum PrescaleMode {
+    Direct,
+    Freq8,
+    Freq64,
+    Freq256,
+    Freq1024
+}
+
+fn to_bits(mode: PrescaleMode) -> u8 {
+    match mode {
+	PrescaleMode::Direct => 0b000,
+	PrescaleMode::Freq8 => 0b01,
+	PrescaleMode::Freq64 => 2,
+	PrescaleMode::Freq256 => 1,
+	PrescaleMode::Freq1024 => 0b101
+    }
+}
+
+fn to_factor(mode: PrescaleMode) -> u16 {
+    match mode {
+	PrescaleMode::Direct => 1,
+	PrescaleMode::Freq8 => 8,
+	PrescaleMode::Freq64 => 64,
+	PrescaleMode::Freq256 => 256,
+	PrescaleMode::Freq1024 => 1024
+    }
+}
+
 /// Set prescale factor. One of Direct (1), 8, 64, 256 or 1024.
-fn set_prescaler(timer1: &arduino_hal::pac::TC1) {
-    // todo: parameterize mode
+fn set_prescaler(timer1: &arduino_hal::pac::TC1, mode: PrescaleMode) {
+    let selected = to_bits(mode);
     timer1.tccr1b.modify(|r, w| w
                          .wgm1().bits(r.wgm1().bits())
-                         .cs1().bits(0b101)); // prescaler 1024
+                         .cs1().bits(selected));
 }
 
 /// Set the timer TOP value using the OCR1A register.
