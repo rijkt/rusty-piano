@@ -54,10 +54,10 @@ pub(crate) enum PrescaleMode {
 
 fn to_bits(mode: PrescaleMode) -> u8 {
     match mode {
-	    PrescaleMode::Direct => 0b000,
-	    PrescaleMode::Freq8 => 0b01,
-	    PrescaleMode::Freq64 => 2,
-	    PrescaleMode::Freq256 => 1,
+	    PrescaleMode::Direct => 0b001,
+	    PrescaleMode::Freq8 => 0b010,
+	    PrescaleMode::Freq64 => 0b011,
+	    PrescaleMode::Freq256 => 0b100,
 	    PrescaleMode::Freq1024 => 0b101
     }
 }
