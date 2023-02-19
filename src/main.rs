@@ -10,15 +10,19 @@ fn main() -> ! {
     let timer1 = peripherals.TC1;
     let pins = arduino_hal::pins!(peripherals);
     enable_fast_pwm(&timer1, pins.d10);
-    let prescaler = 1024;
-    let system_clock: u32 = 16_000_000;
+    let prescale_factor = 1024;
     const A_4: u32 = 440; // hz
-    let timer_clock = system_clock/prescaler;
-    let top = (timer_clock / A_4) as u16 - 1;
-    set_top(&timer1, top);
+    play_note(A_4, prescale_factor, timer1);
     
     loop {
     }
+}
+
+fn play_note(note: u32, prescale_factor: u32, timer1: arduino_hal::pac::TC1) {
+    const SYSTEM_CLOCK: u32 = 16_000_000;
+    let timer_clock = SYSTEM_CLOCK / prescale_factor;
+    let top = (timer_clock / note) as u16 - 1;
+    set_top(&timer1, top);
 }
 
 /// Configure chip to use fast pulse width modulation mode using 16-bit Timer1.
