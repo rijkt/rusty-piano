@@ -12,12 +12,12 @@ fn main() -> ! {
     let pins = arduino_hal::pins!(peripherals);
     driver::enable_fast_pwm(&timer1, pins.d10, prescale_mode);
     const A_4: u32 = 440; // hz
-    play_note(A_4, prescale_mode, timer1);
+    play_tone(A_4, prescale_mode, timer1);
 
     loop {}
 }
 
-fn play_note(
+fn play_tone(
     target_frequency: u32,
     prescale_mode: driver::PrescaleMode,
     timer1: arduino_hal::pac::TC1,
