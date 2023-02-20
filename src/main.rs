@@ -13,15 +13,14 @@ fn main() -> ! {
     driver::enable_fast_pwm(&timer1, pins.d10, prescale_mode);
     const A_4: u32 = 440; // hz
     play_note(A_4, prescale_mode, timer1);
-    
-    loop {
-    }
+
+    loop {}
 }
 
 fn play_note(
     target_frequency: u32,
     prescale_mode: driver::PrescaleMode,
-    timer1: arduino_hal::pac::TC1
+    timer1: arduino_hal::pac::TC1,
 ) {
     const SYSTEM_CLOCK_FREQ: u32 = 16_000_000;
     let prescale_factor = driver::to_factor(prescale_mode);
