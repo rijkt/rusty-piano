@@ -6,7 +6,7 @@ mod driver;
 
 #[arduino_hal::entry]
 fn main() -> ! {
-    let prescale_mode = driver::PrescaleMode::Freq1024;
+    let prescale_mode = driver::PrescaleMode::Direct;
     let peripherals = arduino_hal::Peripherals::take().unwrap();
     let timer1 = peripherals.TC1;
     let pins = arduino_hal::pins!(peripherals);
